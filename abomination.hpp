@@ -36,17 +36,12 @@ extern "C"
 #include <pulse/pulseaudio.h>
 }
 
-class QProjectMWidget;
-
-class QPulseAudioThread : public QThread
+class AbominationFromTheDarkLordsTailPipe : public QObject
 {
 	Q_OBJECT
 	public:
 		typedef QHash<int, QString> SourceContainer;
-		QPulseAudioThread () {}
-        QPulseAudioThread(int _argc, char **_argv, QProjectMWidget *p);
-		virtual ~QPulseAudioThread();
-		void run();
+        AbominationFromTheDarkLordsTailPipe(QObject *p) : QObject(p) { /**/ }
 
 		QMutex * mutex();
 
@@ -58,8 +53,10 @@ class QPulseAudioThread : public QThread
 		inline const SourceContainer::const_iterator & sourcePosition() {
 			return s_sourcePosition;
 		}
+        static AbominationFromTheDarkLordsTailPipe* instance(QObject *p = nullptr);
 
 	public slots:
+        void run();
 
 		void cork();
 
@@ -71,12 +68,13 @@ class QPulseAudioThread : public QThread
 
 		void connectDevice(const QModelIndex & index = QModelIndex());
 
-	signals:
+    signals:
+        void pcmDataGenerated(float*, int);
 		void deviceChanged();
 		void threadCleanedUp();
 	private:
-        static QProjectMWidget *pWidget;
-
+        static AbominationFromTheDarkLordsTailPipe* pInstance;
+        QThread *pulseThread;
 		static SourceContainer::const_iterator readSettings();
 
 		static void reconnect(SourceContainer::const_iterator pos);
@@ -88,7 +86,7 @@ class QPulseAudioThread : public QThread
 		static void stream_read_callback ( pa_stream *s, size_t length, void *userdata );
 		static void stream_state_callback ( pa_stream *s, void *userdata );
 		static void context_state_callback ( pa_context *c, void *userdata );
-		static void initialize_callbacks ( QPulseAudioThread * pulseThread );
+        static void initialize_callbacks ( AbominationFromTheDarkLordsTailPipe * pulseThread );
 		static void context_drain_complete ( pa_context*c, void *userdata );
 		static void stream_drain_complete ( pa_stream*s, int success, void *userdata );
 		static void stdout_callback ( pa_mainloop_api*a, pa_io_event *e, int fd, pa_io_event_flags_t f, void *userdata );
@@ -104,8 +102,6 @@ class QPulseAudioThread : public QThread
 		static QMutex * s_audioMutex;
 		static SourceContainer s_sourceList;
 		static SourceContainer::const_iterator s_sourcePosition;
-		int argc;
-		char ** argv;
 		static pa_context *context;
 		static pa_stream *stream;
 		static pa_mainloop_api *mainloop_api;
