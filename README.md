@@ -12,3 +12,8 @@ qmake
 make
 
 I use Arch Linux on the Raspberry Pi 3 aarch64, and am running this against their packaged projectm to good effect
+
+# Requirements
+
+* Qt
+* Full blown OpenGL (vc4 baby. ProjectM has GLES(v1) support, but then you will probably want to compile that yourself too)
