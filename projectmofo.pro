@@ -3,7 +3,6 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = projectmofo
 INCLUDEPATH += .
 
 # The following define makes your compiler warn you if you use any
@@ -25,3 +24,11 @@ SOURCES += main.cpp projectmwindow.cpp \
 
 CONFIG += link_pkgconfig
 PKGCONFIG += libprojectM libpulse
+
+TARGET = projectmofo
+target.path = /usr/bin
+
+systemd.path = /usr/lib/systemd/system
+systemd.files += src/resources/projectmofo@.service
+
+INSTALLS += target systemd
