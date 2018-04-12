@@ -45,7 +45,7 @@ int main ( int argc, char*argv[] )
         QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
         QSurfaceFormat::setDefaultFormat(format);
-    }else if (settings.value("forceTripleBuffer", true).toBool()) {
+    } else if (settings.value("forceTripleBuffer", true).toBool()) {
         qDebug() << "force triple buffer";
         QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapBehavior(QSurfaceFormat::TripleBuffer);

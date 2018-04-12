@@ -4,7 +4,9 @@
 
 #include <abomination.hpp>
 
-std::string ProjectMWindow::configPath = "/home/sirspudd/.projectM/config.inp";
+#include <QStandardPaths>
+
+std::string ProjectMWindow::configPath = QString(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() + "/.projectM/config.inp").toStdString();
 
 ProjectMWindow::ProjectMWindow()
     : QOpenGLWindow(QOpenGLWindow::NoPartialUpdate)
