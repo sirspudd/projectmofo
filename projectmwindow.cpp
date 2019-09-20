@@ -12,7 +12,7 @@ ProjectMWindow::ProjectMWindow()
     : QOpenGLWindow(QOpenGLWindow::NoPartialUpdate)
 {
     pulseReader = new QThread(this);
-    AbominationFromTheDarkLordsTailPipe *pulseAudioGremlin = AbominationFromTheDarkLordsTailPipe::instance(this);
+    AbominationFromTheDarkLordsTailPipe *pulseAudioGremlin = AbominationFromTheDarkLordsTailPipe::instance();
     pulseAudioGremlin->moveToThread(pulseReader);
     QMetaObject::invokeMethod(pulseAudioGremlin, "run", Qt::QueuedConnection);
     connect(pulseAudioGremlin, &AbominationFromTheDarkLordsTailPipe::pcmDataGenerated, this, &ProjectMWindow::forwardPCMfloat, Qt::QueuedConnection);

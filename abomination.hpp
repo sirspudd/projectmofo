@@ -41,7 +41,7 @@ class AbominationFromTheDarkLordsTailPipe : public QObject
 	Q_OBJECT
 	public:
 		typedef QHash<int, QString> SourceContainer;
-        AbominationFromTheDarkLordsTailPipe(QObject *p) : QObject(p) { /**/ }
+        AbominationFromTheDarkLordsTailPipe() : QObject() { /**/ }
 
 		QMutex * mutex();
 
@@ -53,7 +53,7 @@ class AbominationFromTheDarkLordsTailPipe : public QObject
 		inline const SourceContainer::const_iterator & sourcePosition() {
 			return s_sourcePosition;
 		}
-        static AbominationFromTheDarkLordsTailPipe* instance(QObject *p = nullptr);
+        static AbominationFromTheDarkLordsTailPipe* instance();
 
 	public slots:
         void run();

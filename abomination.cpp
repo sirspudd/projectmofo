@@ -254,10 +254,10 @@ QMutex * AbominationFromTheDarkLordsTailPipe::mutex() {
     return s_audioMutex;
 }
 
-AbominationFromTheDarkLordsTailPipe *AbominationFromTheDarkLordsTailPipe::instance(QObject *p)
+AbominationFromTheDarkLordsTailPipe *AbominationFromTheDarkLordsTailPipe::instance()
 {
     if (!pInstance) {
-        pInstance = new AbominationFromTheDarkLordsTailPipe(p);
+        pInstance = new AbominationFromTheDarkLordsTailPipe();
     }
     return pInstance;
 }
