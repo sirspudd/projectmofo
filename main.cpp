@@ -11,6 +11,7 @@
 int main ( int argc, char*argv[] )
 {
     QGuiApplication app(argc, argv);
+    QGuiApplication::setOverrideCursor(Qt::BlankCursor);
     app.setOrganizationName("Chaos Reins");
     app.setApplicationName("projectmofo");
 
