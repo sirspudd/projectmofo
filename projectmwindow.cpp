@@ -1,8 +1,7 @@
 #include "projectmwindow.h"
+#include "abomination.hpp"
 
 #include <libprojectM/projectM.hpp>
-
-#include <abomination.hpp>
 
 #include <QStandardPaths>
 
@@ -13,33 +12,53 @@ ProjectMWindow::ProjectMWindow()
 {
     pulseReader = new QThread(this);
     AbominationFromTheDarkLordsTailPipe *pulseAudioGremlin = AbominationFromTheDarkLordsTailPipe::instance();
+    connect(pulseAudioGremlin, &AbominationFromTheDarkLordsTailPipe::pcmDataGenerated, this, &ProjectMWindow::forwardPCMfloat, Qt::QueuedConnection);
     pulseAudioGremlin->moveToThread(pulseReader);
     QMetaObject::invokeMethod(pulseAudioGremlin, "run", Qt::QueuedConnection);
-    connect(pulseAudioGremlin, &AbominationFromTheDarkLordsTailPipe::pcmDataGenerated, this, &ProjectMWindow::forwardPCMfloat, Qt::QueuedConnection);
 }
 
 ProjectMWindow::~ProjectMWindow()
 {
-    delete projectMInstance;
     pulseReader->exit();
+    pulseReader->wait(10);
+
+    delete projectMInstance;
     delete pulseReader;
 }
 
 void ProjectMWindow::forwardPCMfloat(float *PCMdata, int samples)
 {
-    projectMInstance->pcm()->addPCMfloat(PCMdata, samples);
+    if (projectMInstance) {
+        projectMInstance->pcm()->addPCMfloat(PCMdata, samples);
+    }
+}
+
+void ProjectMWindow::initialize()
+{
+    if (!projectMInstance) {
+        projectMInstance = new projectM(configPath);
+        resizeGL(width(), height());
+        paintGL();
+        pulseReader->start();
+    }
 }
 
 void ProjectMWindow::paintGL() {
-    projectMInstance->renderFrame();
-    update();
+    if (projectMInstance) {
+        projectMInstance->renderFrame();
+        update();
+    }
+    QOpenGLWindow::paintGL();
 }
 
 void ProjectMWindow::resizeGL(int w, int h) {
-    projectMInstance = new projectM(configPath);
-    init(w, h);
-    projectMInstance->projectM_resetGL (w, h);
-    pulseReader->start();
+    if (!projectMInstance) {
+        QMetaObject::invokeMethod(this, "initialize", Qt::QueuedConnection);
+    } else {
+        projectMInstance->projectM_resetGL(w, h);
+        init(w, h);
+    }
+    QOpenGLWindow::resizeGL(w, h);
 }
 
 void ProjectMWindow::init(int w, int h)

@@ -1,5 +1,4 @@
-#ifndef PROJECT_M_WINDOW
-#define PROJECT_M_WINDOW
+#pragma once
 
 #include <string>
 
@@ -17,6 +16,7 @@ public:
 
 public slots:
     void forwardPCMfloat(float *PCMdata, int samples);
+    void initialize();
 
 protected:
     void paintGL() override;
@@ -25,8 +25,7 @@ protected:
 private:
     void init(int w, int h);
 
-    QThread *pulseReader;
+    QThread *pulseReader = nullptr;
     static std::string configPath;
-    projectM *projectMInstance;
+    projectM *projectMInstance = nullptr;
 };
-#endif

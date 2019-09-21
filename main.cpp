@@ -17,45 +17,44 @@ int main ( int argc, char*argv[] )
 
     QSettings settings;
 
-    if (settings.value("force32bpp", true).toBool()) {
-        qDebug() << "force 32bpp";
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+    if (settings.value("force24bpp", true).toBool()) {
+        qDebug() << "force 24bpp";
         // Raspberry Pi defaults to 16bpp
-        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setAlphaBufferSize(0);
         format.setRedBufferSize(8);
         format.setGreenBufferSize(8);
         format.setBlueBufferSize(8);
-        QSurfaceFormat::setDefaultFormat(format);
     } else if (settings.value("force16bpp", true).toBool()) {
         qDebug() << "force 16bpp";
-        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setAlphaBufferSize(0);
         format.setRedBufferSize(5);
         format.setGreenBufferSize(6);
         format.setBlueBufferSize(5);
-        QSurfaceFormat::setDefaultFormat(format);
     }
 
     if (settings.value("forceSingleBuffer", false).toBool()) {
         qDebug() << "force single buffer";
-        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapBehavior(QSurfaceFormat::SingleBuffer);
-        QSurfaceFormat::setDefaultFormat(format);
     } else if (settings.value("forceDoubleBuffer", true).toBool()) {
         qDebug() << "force double buffer";
-        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-        QSurfaceFormat::setDefaultFormat(format);
     } else if (settings.value("forceTripleBuffer", true).toBool()) {
         qDebug() << "force triple buffer";
-        QSurfaceFormat format = QSurfaceFormat::defaultFormat();
         format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-        QSurfaceFormat::setDefaultFormat(format);
     }
+    QSurfaceFormat::setDefaultFormat(format);
+
+    bool fullscreen = settings.value("fullscreen", false).toBool();
+    settings.setValue("fullscreen", fullscreen);
 
     ProjectMWindow window;
-    window.resize(640, 480);
-    window.show();
+    if (fullscreen) {
+        window.showFullScreen();
+    } else {
+        window.resize(640, 480);
+        window.show();
+    }
 
     return app.exec();
 }
