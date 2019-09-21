@@ -3,6 +3,7 @@
 #include <string>
 
 #include <QOpenGLWindow>
+#include <QKeyEvent>
 
 class AbominationFromTheDarkLordsTailPipe;
 class projectM;
@@ -19,6 +20,7 @@ public slots:
     void initialize();
 
 protected:
+    void keyPressEvent(QKeyEvent *ev);
     void paintGL() override;
     void resizeGL(int w, int h) override;
 

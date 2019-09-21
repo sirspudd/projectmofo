@@ -4,6 +4,7 @@
 #include <libprojectM/projectM.hpp>
 
 #include <QStandardPaths>
+#include <QCoreApplication>
 
 std::string ProjectMWindow::configPath = QString(QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first() + "/.projectM/config.inp").toStdString();
 
@@ -41,6 +42,20 @@ void ProjectMWindow::initialize()
         paintGL();
         pulseReader->start();
     }
+}
+
+void ProjectMWindow::keyPressEvent(QKeyEvent *ev)
+{
+    if (ev->key() == Qt::Key_F) {
+        if (windowState() == Qt::WindowFullScreen) {
+            show();
+        } else {
+            showFullScreen();
+        }
+    } else if (ev->key() == Qt::Key_Escape) {
+        qApp->quit();
+    }
+    QOpenGLWindow::keyPressEvent(ev);
 }
 
 void ProjectMWindow::paintGL() {
