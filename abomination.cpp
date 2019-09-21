@@ -7,8 +7,6 @@
 
    Copyright 2004-2006 Lennart Poettering
    Copyright 2006 Pierre Ossman <ossman@cendio.se> for Cendio AB
-
-
  ***/
 
 #include <signal.h>
@@ -58,22 +56,20 @@ AbominationFromTheDarkLordsTailPipe::SourceContainer::const_iterator Abomination
 
 AbominationFromTheDarkLordsTailPipe::SourceContainer::const_iterator AbominationFromTheDarkLordsTailPipe::readSettings()
 {
+    QSettings settings;
+    QString deviceName = settings.value("pulseAudioDeviceName", QString()).toString();
 
-    QSettings settings ( "projectM", "qprojectM-pulseaudio" );
+    qDebug() << "Available pulse sources";
+    for (SourceContainer::const_iterator pos = s_sourceList.begin(); pos != s_sourceList.end(); ++pos) {
+        qDebug() << "Device:" << *pos;;
+    }
+    qDebug() << "Done: Available pulse sources";
 
-    bool tryFirst = settings.value
-        ( "tryFirstAvailablePlaybackMonitor", true ).toBool() ;
-
-    if ( tryFirst )
-    {
-
-        return s_sourceList.end();
+    if (deviceName.isEmpty()) {
+        qDebug() << "No device specified, grabbing" << *s_sourceList.begin();
     } else {
-
-        QString deviceName = settings.value("pulseAudioDeviceName", QString()).toString();
         qDebug() << "device name is " << deviceName;
-        for (SourceContainer::const_iterator pos = s_sourceList.begin();
-                pos != s_sourceList.end(); ++pos) {
+        for (SourceContainer::const_iterator pos = s_sourceList.begin(); pos != s_sourceList.end(); ++pos) {
             if (*pos == deviceName) {
                 return pos;
             }
@@ -137,9 +133,7 @@ void AbominationFromTheDarkLordsTailPipe::connectHelper (SourceContainer::const_
 {
     Q_ASSERT(stream);
     pa_stream_flags_t flags = ( pa_stream_flags_t ) 0;
-    //	qDebug() << "start2 ";
     assert (pos != s_sourceList.end());
-    qDebug() << "connectHelper: " << *pos;
     int r;
     if ( ( ( r = pa_stream_connect_record (stream, (*pos).toStdString().c_str(), NULL, flags ) ) ) < 0 )
     {
@@ -207,26 +201,26 @@ void AbominationFromTheDarkLordsTailPipe::reconnect(SourceContainer::const_itera
     }
 
     pa_stream_set_state_callback
-        ( stream, stream_state_callback, &s_sourceList );
+            ( stream, stream_state_callback, &s_sourceList );
     pa_stream_set_read_callback ( stream, stream_read_callback, &s_sourceList );
     pa_stream_set_moved_callback(stream, stream_moved_callback, &s_sourceList );
 
     switch (pa_stream_get_state(stream)) {
-        case PA_STREAM_UNCONNECTED:// 	The stream is not yet connected to any sink or source.
-            qDebug() << "unconnected: connecting...";
-            connectHelper(s_sourcePosition);
-            break;
-        case PA_STREAM_CREATING 	://The stream is being created.
-            break;
-        case PA_STREAM_READY ://	The stream is established, you may pass audio data to it now.
-            qDebug() << "stream is still ready, waiting for callback...";
-            break;
-        case PA_STREAM_FAILED ://	An error occured that made the stream invalid.
-            qDebug() << "stream is now invalid. great.";
-            break;
-        case PA_STREAM_TERMINATED:// 	The stream has been terminated cleanly.
-            qDebug() << "terminated...";
-            break;
+    case PA_STREAM_UNCONNECTED:// 	The stream is not yet connected to any sink or source.
+        qDebug() << "unconnected: connecting...";
+        connectHelper(s_sourcePosition);
+        break;
+    case PA_STREAM_CREATING 	://The stream is being created.
+        break;
+    case PA_STREAM_READY ://	The stream is established, you may pass audio data to it now.
+        qDebug() << "stream is still ready, waiting for callback...";
+        break;
+    case PA_STREAM_FAILED ://	An error occured that made the stream invalid.
+        qDebug() << "stream is now invalid. great.";
+        break;
+    case PA_STREAM_TERMINATED:// 	The stream has been terminated cleanly.
+        qDebug() << "terminated...";
+        break;
 
     }
 }
@@ -241,7 +235,6 @@ void AbominationFromTheDarkLordsTailPipe::pa_stream_success_callback(pa_stream *
     else {
         qDebug() << "play";
     }
-
 
     pausedFlag = !pausedFlag;
 
@@ -267,7 +260,7 @@ void AbominationFromTheDarkLordsTailPipe::cork()
     int b = 0;
 
     pa_operation* op =
-        pa_stream_cork(stream, b, pa_stream_success_callback, this);
+            pa_stream_cork(stream, b, pa_stream_success_callback, this);
 
     if (op)
         pa_operation_unref(op);
@@ -281,7 +274,6 @@ void AbominationFromTheDarkLordsTailPipe::pulseQuit ( int ret )
 {
     assert ( mainloop_api );
     mainloop_api->quit ( mainloop_api, ret );
-
 }
 
 
@@ -299,7 +291,7 @@ void AbominationFromTheDarkLordsTailPipe::stream_read_callback ( pa_stream *s, s
         fprintf ( stderr, "pa_stream_peek() failed: %s\n", pa_strerror ( pa_context_errno ( context ) ) );
         pulseQuit ( 1 );
         return
-            ;
+                ;
     }
 
     assert ( data && length );
@@ -331,35 +323,35 @@ void AbominationFromTheDarkLordsTailPipe::stream_state_callback ( pa_stream *s, 
 
     switch ( pa_stream_get_state ( s ) )
     {
-        case PA_STREAM_UNCONNECTED:
-            qDebug() << "UNCONNECTED";
-            break;
-        case PA_STREAM_CREATING:
-            qDebug() << "CREATED";
-            break;
-        case PA_STREAM_TERMINATED:
-            qDebug() << "TERMINATED";
-            break;
-        case PA_STREAM_READY:
-            qDebug() << "READY";
-            if ( verbose )
-            {
-                const pa_buffer_attr *a;
-                fprintf ( stderr, "Stream successfully created.\n" );
+    case PA_STREAM_UNCONNECTED:
+        qDebug() << "UNCONNECTED";
+        break;
+    case PA_STREAM_CREATING:
+        qDebug() << "CREATED";
+        break;
+    case PA_STREAM_TERMINATED:
+        qDebug() << "TERMINATED";
+        break;
+    case PA_STREAM_READY:
+        qDebug() << "READY";
+        if ( verbose )
+        {
+            const pa_buffer_attr *a;
+            fprintf ( stderr, "Stream successfully created.\n" );
 
-                if ( ! ( a = pa_stream_get_buffer_attr ( s ) ) )
-                    fprintf ( stderr, "pa_stream_get_buffer_attr() failed: %s\n", pa_strerror ( pa_context_errno ( pa_stream_get_context ( s ) ) ) );
-                else
-                {
-                    fprintf(stderr, "Buffer metrics: maxlength=%u, fragsize=%u\n", a->maxlength, a->fragsize);
-                }
+            if ( ! ( a = pa_stream_get_buffer_attr ( s ) ) )
+                fprintf ( stderr, "pa_stream_get_buffer_attr() failed: %s\n", pa_strerror ( pa_context_errno ( pa_stream_get_context ( s ) ) ) );
+            else
+            {
+                fprintf(stderr, "Buffer metrics: maxlength=%u, fragsize=%u\n", a->maxlength, a->fragsize);
             }
-            break;
-        case PA_STREAM_FAILED:
-            qDebug() << "FAILED";
-        default:
-            fprintf ( stderr, "Stream error: %s\n", pa_strerror ( pa_context_errno ( pa_stream_get_context ( s ) ) ) );
-            pulseQuit ( 1 );
+        }
+        break;
+    case PA_STREAM_FAILED:
+        qDebug() << "FAILED";
+    default:
+        fprintf ( stderr, "Stream error: %s\n", pa_strerror ( pa_context_errno ( pa_stream_get_context ( s ) ) ) );
+        pulseQuit ( 1 );
     }
 }
 
@@ -378,50 +370,49 @@ void AbominationFromTheDarkLordsTailPipe::context_state_callback ( pa_context *c
 
     switch ( pa_context_get_state ( c ) )
     {
-        case PA_CONTEXT_CONNECTING:
-        case PA_CONTEXT_AUTHORIZING:
-        case PA_CONTEXT_SETTING_NAME:
-            break;
+    case PA_CONTEXT_CONNECTING:
+    case PA_CONTEXT_AUTHORIZING:
+    case PA_CONTEXT_SETTING_NAME:
+        break;
 
-        case PA_CONTEXT_READY:
-            {
-                int r;
+    case PA_CONTEXT_READY:
+    {
+        int r;
 
-                assert ( c && !stream );
+        assert ( c && !stream );
 
-                if ( verbose )
-                    fprintf ( stderr, "Connection established.\n" );
-                /*
+        if ( verbose )
+            fprintf ( stderr, "Connection established.\n" );
+        /*
                    if ( ! ( stream = pa_stream_new ( c, stream_name, &sample_spec, channel_map_set ? &channel_map : NULL ) ) )
                    {
                    fprintf ( stderr, "pa_stream_new() failed: %s\n", pa_strerror ( pa_context_errno ( c ) ) );
                    goto fail;
                    }
                    */
-                initialize_callbacks ( ( AbominationFromTheDarkLordsTailPipe * ) userdata );
+        initialize_callbacks ( ( AbominationFromTheDarkLordsTailPipe * ) userdata );
 
-                //			pa_stream_set_state_callback
-                //				( stream, stream_state_callback, userdata );
-                //			pa_stream_set_read_callback ( stream, stream_read_callback, userdata );
-                //			pa_stream_set_moved_callback(stream, stream_moved_callback, userdata );
-                break;
-            }
+        //			pa_stream_set_state_callback
+        //				( stream, stream_state_callback, userdata );
+        //			pa_stream_set_read_callback ( stream, stream_read_callback, userdata );
+        //			pa_stream_set_moved_callback(stream, stream_moved_callback, userdata );
+        break;
+    }
 
-        case PA_CONTEXT_TERMINATED:
-            pulseQuit ( 0 );
-            break;
+    case PA_CONTEXT_TERMINATED:
+        pulseQuit ( 0 );
+        break;
 
-        case PA_CONTEXT_FAILED:
-        default:
-            fprintf ( stderr, "Connection failure: %s\n", pa_strerror ( pa_context_errno ( c ) ) );
-            goto fail;
+    case PA_CONTEXT_FAILED:
+    default:
+        fprintf ( stderr, "Connection failure: %s\n", pa_strerror ( pa_context_errno ( c ) ) );
+        goto fail;
     }
 
     return;
 
 fail:
     pulseQuit ( 1 );
-
 }
 
 /* Connection draining complete */
@@ -487,8 +478,8 @@ void AbominationFromTheDarkLordsTailPipe::stream_update_timing_callback ( pa_str
     assert ( s );
 
     if ( !success ||
-            pa_stream_get_time ( s, &usec ) < 0 ||
-            pa_stream_get_latency ( s, &latency, &negative ) < 0 )
+         pa_stream_get_time ( s, &usec ) < 0 ||
+         pa_stream_get_latency ( s, &latency, &negative ) < 0 )
     {
         fprintf ( stderr, "Failed to get latency: %s\n", pa_strerror ( pa_context_errno ( context ) ) );
         pulseQuit ( 1 );
@@ -496,8 +487,8 @@ void AbominationFromTheDarkLordsTailPipe::stream_update_timing_callback ( pa_str
     }
 
     fprintf ( stderr, "Time: %0.3f sec; Latency: %0.0f usec.  \r",
-            ( float ) usec / 1000000,
-            ( float ) latency * ( negative?-1:1 ) );
+              ( float ) usec / 1000000,
+              ( float ) latency * ( negative?-1:1 ) );
 }
 
 /* Someone requested that the latency is shown */
@@ -540,43 +531,43 @@ void AbominationFromTheDarkLordsTailPipe::subscribe_callback ( struct pa_context
     AbominationFromTheDarkLordsTailPipe * thread = static_cast<AbominationFromTheDarkLordsTailPipe *>(userdata);
     switch ( t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK )
     {
-        case PA_SUBSCRIPTION_EVENT_SINK:
-            break;
-        case PA_SUBSCRIPTION_EVENT_SOURCE:
-            {
-                if ( ( t & PA_SUBSCRIPTION_EVENT_TYPE_MASK ) == PA_SUBSCRIPTION_EVENT_REMOVE ) {
-                    qDebug() << "Warning! untested code. email carmelo.piccione@gmail.com if it explodes";
-                    SourceContainer::const_iterator pos = s_sourceList.find(index);
-                    if (pos == s_sourcePosition) {
-                        s_sourceList.remove(index);
-                        reconnect();
-                        thread->deviceChanged();
-                    } else {
-                        s_sourceList.remove(index);
-                        thread->deviceChanged();
-                    }
-                }
-                else
-                {
-                    pa_operation_unref ( pa_context_get_source_info_by_index ( context, index, pa_source_info_callback, userdata ) );
-                }
-                break;
+    case PA_SUBSCRIPTION_EVENT_SINK:
+        break;
+    case PA_SUBSCRIPTION_EVENT_SOURCE:
+    {
+        if ( ( t & PA_SUBSCRIPTION_EVENT_TYPE_MASK ) == PA_SUBSCRIPTION_EVENT_REMOVE ) {
+            qDebug() << "Warning! untested code. email carmelo.piccione@gmail.com if it explodes";
+            SourceContainer::const_iterator pos = s_sourceList.find(index);
+            if (pos == s_sourcePosition) {
+                s_sourceList.remove(index);
+                reconnect();
+                thread->deviceChanged();
+            } else {
+                s_sourceList.remove(index);
+                thread->deviceChanged();
             }
-        case PA_SUBSCRIPTION_EVENT_MODULE:
-            break;
-        case PA_SUBSCRIPTION_EVENT_CLIENT:
-            break;
-        case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-            break;
-        case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT:
-            break;
-        case PA_SUBSCRIPTION_EVENT_SAMPLE_CACHE:
-            break;
-        case PA_SUBSCRIPTION_EVENT_SERVER:
-            break;
-        default:
-            fprintf ( stderr, "OTHER EVENT\n" );
-            break;
+        }
+        else
+        {
+            pa_operation_unref ( pa_context_get_source_info_by_index ( context, index, pa_source_info_callback, userdata ) );
+        }
+        break;
+    }
+    case PA_SUBSCRIPTION_EVENT_MODULE:
+        break;
+    case PA_SUBSCRIPTION_EVENT_CLIENT:
+        break;
+    case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
+        break;
+    case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT:
+        break;
+    case PA_SUBSCRIPTION_EVENT_SAMPLE_CACHE:
+        break;
+    case PA_SUBSCRIPTION_EVENT_SERVER:
+        break;
+    default:
+        fprintf ( stderr, "OTHER EVENT\n" );
+        break;
 
     }
 }
@@ -712,7 +703,7 @@ void AbominationFromTheDarkLordsTailPipe::initialize_callbacks ( AbominationFrom
 {
     pa_operation * op;
     pa_operation_unref
-        ( pa_context_get_source_info_list ( context, pa_source_info_callback, pulseThread ) );
+            ( pa_context_get_source_info_list ( context, pa_source_info_callback, pulseThread ) );
 
     //pa_operation_unref(pa_context_get_server_info(&c, server_info_callback, this));
     //pa_operation_unref(pa_context_get_sink_info_list(&c, sink_info_callback, this));
@@ -728,7 +719,7 @@ void AbominationFromTheDarkLordsTailPipe::initialize_callbacks ( AbominationFrom
     pa_context_set_subscribe_callback ( context, subscribe_callback, pulseThread );
 
     if ( op = pa_context_subscribe ( context, ( enum pa_subscription_mask )
-                PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT, NULL, NULL ) )
+                                     PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT, NULL, NULL ) )
     {
         pa_operation_unref ( op );
     }
