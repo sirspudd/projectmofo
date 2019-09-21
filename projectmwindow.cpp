@@ -41,6 +41,7 @@ void ProjectMWindow::initialize()
         resizeGL(width(), height());
         paintGL();
         pulseReader->start();
+        projectMInstance->selectRandom(true);
     }
 }
 
@@ -54,6 +55,8 @@ void ProjectMWindow::keyPressEvent(QKeyEvent *ev)
         }
     } else if (ev->key() == Qt::Key_Escape) {
         qApp->quit();
+    } else if (ev->key() == Qt::Key_Right) {
+        projectMInstance->selectRandom(true);
     }
     QOpenGLWindow::keyPressEvent(ev);
 }
