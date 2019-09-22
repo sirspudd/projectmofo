@@ -57,22 +57,20 @@ AbominationFromTheDarkLordsTailPipe::SourceContainer::const_iterator Abomination
 AbominationFromTheDarkLordsTailPipe::SourceContainer::const_iterator AbominationFromTheDarkLordsTailPipe::readSettings()
 {
     QSettings settings;
-    QString deviceName = settings.value("pulseAudioDeviceName", QString()).toString();
+    QString deviceName = settings.value("defaultpulseAudioDeviceName", *s_sourceList.begin()).toString();
+    settings.setValue("defaultpulseAudioDeviceName", deviceName);
+    qDebug() << "Using device:" << deviceName;
 
-    qDebug() << "Available pulse sources";
+    QStringList devices;
     for (SourceContainer::const_iterator pos = s_sourceList.begin(); pos != s_sourceList.end(); ++pos) {
-        qDebug() << "Device:" << *pos;;
+        devices << *pos;;
     }
-    qDebug() << "Done: Available pulse sources";
+    qDebug() << "Available devices:" << devices;
+    settings.setValue("devices", devices);
 
-    if (deviceName.isEmpty()) {
-        qDebug() << "No device specified, grabbing" << *s_sourceList.begin();
-    } else {
-        qDebug() << "device name is " << deviceName;
-        for (SourceContainer::const_iterator pos = s_sourceList.begin(); pos != s_sourceList.end(); ++pos) {
-            if (*pos == deviceName) {
-                return pos;
-            }
+    for (SourceContainer::const_iterator pos = s_sourceList.begin(); pos != s_sourceList.end(); ++pos) {
+        if (*pos == deviceName) {
+             return pos;
         }
     }
     return s_sourceList.end();
