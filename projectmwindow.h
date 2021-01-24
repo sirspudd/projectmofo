@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <QOpenGLWindow>
+#include <QtOpenGL/QOpenGLWindow>
 #include <QKeyEvent>
 
 class AbominationFromTheDarkLordsTailPipe;
