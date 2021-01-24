@@ -66,8 +66,6 @@ class AbominationFromTheDarkLordsTailPipe : public QObject
 
 		void cleanup();
 
-		void connectDevice(const QModelIndex & index = QModelIndex());
-
     signals:
         void pcmDataGenerated(float*, int);
 		void deviceChanged();

@@ -32,3 +32,5 @@ systemd.path = /usr/lib/systemd/system
 systemd.files += src/resources/projectmofo@.service
 
 INSTALLS += target systemd
+
+QT += opengl

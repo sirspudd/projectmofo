@@ -155,18 +155,6 @@ AbominationFromTheDarkLordsTailPipe::SourceContainer::const_iterator Abomination
 
 }
 
-void AbominationFromTheDarkLordsTailPipe::connectDevice ( const QModelIndex & index )
-{
-
-    if (index.isValid())
-        reconnect(s_sourceList.begin() + index.row());
-    else
-        reconnect(s_sourceList.end());
-
-    emit(deviceChanged());
-}
-
-
 void AbominationFromTheDarkLordsTailPipe::reconnect(SourceContainer::const_iterator pos = s_sourceList.end()) {
 
     if (s_sourceList.empty())
@@ -347,6 +335,7 @@ void AbominationFromTheDarkLordsTailPipe::stream_state_callback ( pa_stream *s, 
         break;
     case PA_STREAM_FAILED:
         qDebug() << "FAILED";
+        break;
     default:
         fprintf ( stderr, "Stream error: %s\n", pa_strerror ( pa_context_errno ( pa_stream_get_context ( s ) ) ) );
         pulseQuit ( 1 );
@@ -422,7 +411,6 @@ void AbominationFromTheDarkLordsTailPipe::context_drain_complete ( pa_context*c,
 /* Some data may be written to STDOUT */
 void AbominationFromTheDarkLordsTailPipe::stdout_callback ( pa_mainloop_api*a, pa_io_event *e, int fd, pa_io_event_flags_t f, void *userdata )
 {
-
     assert ( a == mainloop_api && e && stdio_event == e );
 
     if ( !buffer )
@@ -594,9 +582,8 @@ void AbominationFromTheDarkLordsTailPipe::run()
 {
 
     const char * error = "FOO";
-    int ret = 1, r, c;
+    int r;
     const char *bn = "projectM";
-    pa_operation * operation ;
     sample_spec.format = PA_SAMPLE_FLOAT32LE;
     sample_spec.rate = 44100;
     sample_spec.channels = 2;
